@@ -13,15 +13,9 @@ pub async fn sync(config: &Config) {
     for (name, source) in &config.sources {
         info!("Syncing source: {}", name);
 
-        match sync_source(source, targets).await {
+        match source.sync(targets).await {
             Ok(_) => info!("Synced source: {}", name),
             Err(err) => info!("Failed to sync source {}: {}", name, err),
         }
-    }
-}
-
-async fn sync_source(source: &Source, targets: &HashMap<String, Target>) -> anyhow::Result<()> {
-    match source.type_ {
-        SourceType::Github => source::github::sync(source, targets).await,
     }
 }

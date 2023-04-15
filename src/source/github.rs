@@ -7,52 +7,53 @@ use octocrab::models::Repository;
 use crate::config::{Source, Target};
 use crate::target;
 
-pub async fn sync(source: &Source, targets: &HashMap<String, Target>) -> anyhow::Result<()> {
-    let client = Octocrab::builder()
-        .personal_token(source.token.clone())
-        .build()?;
+impl Source {
+    pub async fn sync_from_github(&self, targets: &HashMap<String, Target>) -> anyhow::Result<()> {
+        let client = Octocrab::builder()
+            .personal_token(self.token.clone())
+            .build()?;
 
-    let page = if let Some(org_name) = source.org.clone() {
-        client
-            .orgs(org_name)
-            .list_repos()
-            .sort(octocrab::params::repos::Sort::Created)
-            .send()
-            .await?
-    } else {
-        client.current()
-            .list_repos_for_authenticated_user()
-            .sort("created")
-            .send()
-            .await?
-    };
+        let page = if let Some(org_name) = self.org.clone() {
+            client
+                .orgs(org_name)
+                .list_repos()
+                .sort(octocrab::params::repos::Sort::Created)
+                .send()
+                .await?
+        } else {
+            client.current()
+                .list_repos_for_authenticated_user()
+                .sort("created")
+                .send()
+                .await?
+        };
 
-    let repos = iterate_repositories(&client, page).await?;
+        let repos = iterate_repositories(&client, page).await?;
 
-    for repo in repos {
-        for (target_name, target) in targets {
-            let clone_url = match repo.clone_url {
-                None => {
-                    warn!("Skipping repo {} because it has no clone url", repo.name);
-                    continue;
+        for repo in repos {
+            for (target_name, target) in targets {
+                let clone_url = match repo.clone_url {
+                    None => {
+                        warn!("Skipping repo {} because it has no clone url", repo.name);
+                        continue;
+                    }
+                    _ => repo.clone_url.clone().unwrap().as_str().to_string(),
+                };
+
+                let creation_result = target.mirror(
+                    repo.name.clone(),
+                    clone_url,
+                    self.token.clone(),
+                ).await;
+
+                if creation_result.is_err() {
+                    warn!("Failed to create repo {} on target {}: {}", repo.name, target_name, creation_result.err().unwrap());
                 }
-                _ => repo.clone_url.clone().unwrap().as_str().to_string(),
-            };
-
-            let creation_result = target::gitea::create_repo(
-                target,
-                repo.name.clone(),
-                clone_url,
-                source.token.clone(),
-            ).await;
-
-            if creation_result.is_err() {
-                warn!("Failed to create repo {} on target {}: {}", repo.name, target_name, creation_result.err().unwrap());
             }
         }
-    }
 
-    Ok(())
+        Ok(())
+    }
 }
 
 async fn iterate_repositories(client: &Octocrab, page: Page<Repository>) -> anyhow::Result<Vec<Repository>> {
