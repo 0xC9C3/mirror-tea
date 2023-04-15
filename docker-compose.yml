@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  mirror:
+    image: 0xc9c3/mirror-tea
+    container_name: mirror
+    restart: unless-stopped
+    volumes:
+      - ./config.yml:/config.yml
+    command: -c /config.yml

@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  mirror:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mirror-tea
+    volumes:
+      - ./config.yml:/config.yml
+    command: -c /config.yml
+    environment:
+      - RUST_LOG=debug
