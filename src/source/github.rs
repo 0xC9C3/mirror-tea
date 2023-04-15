@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
-use log::{info, warn};
+use log::warn;
 use octocrab::{Octocrab, Page};
 use octocrab::models::Repository;
 
 use crate::config::{Source, Target};
-use crate::target;
 
 impl Source {
     pub async fn sync_from_github(&self, targets: &HashMap<String, Target>) -> anyhow::Result<()> {

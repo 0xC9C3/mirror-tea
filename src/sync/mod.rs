@@ -1,9 +1,6 @@
-use std::collections::HashMap;
-
 use log::info;
 
-use crate::config::{Config, Source, SourceType, Target};
-use crate::source;
+use crate::config::Config;
 
 pub async fn sync(config: &Config) {
     info!("Syncing");

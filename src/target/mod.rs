@@ -1,4 +1,4 @@
-use crate::config::{Source, SourceType, Target, TargetType};
+use crate::config::{Source, Target, TargetType};
 
 pub mod gitea;
 

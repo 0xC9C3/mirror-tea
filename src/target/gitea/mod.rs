@@ -1,6 +1,5 @@
-use gitea_rs::apis::{repository_api, user_api};
-use gitea_rs::apis::configuration::{ApiKey, BasicAuth};
 use gitea_rs::apis::repository_api::repo_migrate;
+use gitea_rs::apis::user_api;
 use gitea_rs::models::migrate_repo_options::Service;
 use gitea_rs::models::MigrateRepoOptions;
 use log::info;
@@ -45,7 +44,7 @@ impl Target {
             SourceType::Github => Service::Github,
         };
 
-        let mut body = MigrateRepoOptions {
+        let body = MigrateRepoOptions {
             repo_name: name,
             clone_addr: url,
             auth_token: Some(source.token.clone()),
