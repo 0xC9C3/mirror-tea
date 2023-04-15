@@ -1,5 +1,7 @@
 # Mirror tea
 
+[![Docker](https://img.shields.io/badge/dockerhub-image-success.svg?logo=Docker)](https://hub.docker.com/r/0xc9c3/mirror-tea)
+
 Mirror tea is a small tool to automatically mirror all git repositories to a gitea instance.
 
 Currently, it only supports mirroring from GitHub to gitea.

@@ -5,10 +5,10 @@ use gitea_rs::models::migrate_repo_options::Service;
 use gitea_rs::models::MigrateRepoOptions;
 use log::info;
 
-use crate::config::Target;
+use crate::config::{Source, SourceType, Target};
 
 impl Target {
-    pub async fn mirror_to_gitea(&self, name: String, url: String, token: String) -> anyhow::Result<()> {
+    pub async fn mirror_to_gitea(&self, name: String, url: String, source: &Source) -> anyhow::Result<()> {
         let mut config = gitea_rs::apis::configuration::Configuration::default();
         config.base_path = self.url.clone();
         config.basic_auth = Some((self.auth.username.clone(), Some(self.auth.password.clone())));
@@ -41,12 +41,16 @@ impl Target {
             return Ok(());
         }
 
+        let service = match source.type_ {
+            SourceType::Github => Service::Github,
+        };
+
         let mut body = MigrateRepoOptions {
             repo_name: name,
             clone_addr: url,
-            auth_token: Some(token),
+            auth_token: Some(source.token.clone()),
             mirror: Some(true),
-            service: Some(Service::Github),
+            service: Some(service),
             auth_password: None,
             auth_username: None,
             description: None,

@@ -43,7 +43,7 @@ impl Source {
                 let creation_result = target.mirror(
                     repo.name.clone(),
                     clone_url,
-                    self.token.clone(),
+                    self,
                 ).await;
 
                 if creation_result.is_err() {
